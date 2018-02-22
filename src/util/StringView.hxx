@@ -34,6 +34,7 @@
 #include "StringAPI.hxx"
 
 #include <cstddef>
+#include <string>
 #include <string_view>
 #include <utility>
 
@@ -227,6 +228,10 @@ struct BasicStringView : ConstBuffer<T> {
 		if (match)
 			size -= needle.size;
 		return match;
+	}
+
+	std::basic_string<T> ToString() const {
+		return std::basic_string<T>(data, this->size);
 	}
 };
 
