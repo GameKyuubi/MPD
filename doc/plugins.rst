@@ -309,7 +309,7 @@ in the form ``qobuz://track/ID``, e.g.:
    * - **format_id N**
      - The `Qobuz format identifier <https://github.com/Qobuz/api-documentation/blob/master/endpoints/track/getFileUrl.md#parameters>`_, i.e. a number which chooses the format and quality to be requested from Qobuz. The default is "5" (320 kbit/s MP3).
 
-.. _decoder_plugins:
+.. _input_ytdl:
 
 youtube-dl
 ----------
@@ -318,8 +318,26 @@ This plugin can play links from YouTube directly. To play songs from other `supp
 
 .. code-block:: none
 
-   mpc add https://www.youtube.com/watch?v=saDmN2f3HI0
+   mpc add https://www.youtube.com/watch?v=HMBrRkp5X88
    mpc add ytdl://https://www.twitch.tv/monstercat
+
+.. list-table::
+   :widths: 20 80
+   :header-rows: 1
+
+   * - Setting
+     - Description
+   * - **domain_whitelist**
+     - Space separated domains to to be played using this plugin by default. All other
+       supported URLs can still be played by adding ytdl:// in front. Default is
+       ``youtu.be music.youtube.com www.youtube.com``.
+   * - **command**
+     - Path or command name of the youtube-dl executable. Default is ``youtube-dl``.
+   * - **config_file**
+     - File or folder path to youtube-dl configuration file. See youtube-dl documentation
+       for more details.
+
+.. _decoder_plugins:
 
 Decoder plugins
 ===============
@@ -1387,10 +1405,11 @@ youtube-dl
 ----------
 
 This plugin can play links from YouTube directly. To play songs from other `supported sites <https://ytdl-org.github.io/youtube-dl/supportedsites.html>`_, prepend ``ytdl://`` in front of the URL.
+The playlist plugin uses configurations from :ref:`input_ytdl` input plugin.
 
 .. code-block:: none
 
-   mpc load https://www.youtube.com/playlist?list=PLczA8pMWxlsFUFEtlc6MuucBX-OmKPKkN
+   mpc load https://www.youtube.com/playlist?list=PLfP6i5T0-DkLYVfwEJJaZ5OfX_7NaX-ig
 
 
 Archive plugins
