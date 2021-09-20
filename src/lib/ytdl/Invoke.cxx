@@ -71,17 +71,22 @@ YtdlProcess::Invoke(const YtdlInit &init, Yajl::Handle &handle, const char *url,
 				break;
 		}
 
-		auto &config_file = init.GetConfigFile();
-		const char *config_flag = config_file.empty() ? nullptr : "--config-location";
-
-		const char *argv[] = {
+		// prefill, then append more arguments as needed...
+		size_t argc = 5;
+		const char *argv[12] = {
 			init.GetExecutable().c_str(),
 			"-Jf", init.GetFormat().c_str(),
 			"--flat-playlist", playlist_flag,
-			url,
-			config_flag, config_file.c_str(),
-			nullptr,
 		};
+
+		auto &config_file = init.GetConfigFile();
+		if (!config_file.empty()) {
+			argv[argc++] = "--config-location";
+			argv[argc++] = config_file.c_str();
+		}
+
+		argv[argc++] = "--";
+		argv[argc++] = url;
 
 		if (execvp(init.GetExecutable().c_str(), const_cast<char * const *>(argv)) < 0) {
 			_exit(EXIT_FAILURE);
