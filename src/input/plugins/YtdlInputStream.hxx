@@ -29,7 +29,7 @@ public:
 
 	std::unique_ptr<Tag> ReadTag() noexcept override;
 
-	gcc_nonnull_all
+	[[gnu::nonnull]]
 	size_t Read(std::unique_lock<Mutex> &lock, void *ptr, size_t size) override;
 
 	void OnComplete(Ytdl::YtdlMonitor* monitor) override;
