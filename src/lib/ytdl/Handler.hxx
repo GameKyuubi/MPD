@@ -2,6 +2,7 @@
 #define MPD_LIB_YTDL_HANDLER_HXX
 
 #include "util/StringView.hxx"
+#include "tag/Type.h"
 
 namespace Ytdl {
 
@@ -9,14 +10,10 @@ class ParserContext;
 
 enum class StringMetadataTag {
 	CREATOR,
-	DESCRIPTION,
 	EXTRACTOR,
 	PLAYLIST_TITLE,
 	TITLE,
 	TYPE,
-	UPLOAD_DATE,
-	UPLOADER_NAME,
-	UPLOADER_ID,
 	URL,
 	WEBPAGE_URL,
 };
@@ -37,6 +34,7 @@ class MetadataHandler {
 	virtual ParseContinue OnEntryStart() noexcept = 0;
 	virtual ParseContinue OnEntryEnd() noexcept = 0;
 	virtual ParseContinue OnEnd() noexcept = 0;
+	virtual ParseContinue OnMetadata(TagType tag, StringView value) noexcept = 0;
 	virtual ParseContinue OnMetadata(StringMetadataTag tag, StringView value) noexcept = 0;
 	virtual ParseContinue OnMetadata(IntMetadataTag tag, long long int value) noexcept = 0;
 	virtual ParseContinue OnHeader(StringView header, StringView value) noexcept = 0;

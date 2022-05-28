@@ -1,5 +1,7 @@
 #include "config.h"
 #include "lib/yajl/Callbacks.hxx"
+#include "tag/Table.hxx"
+#include "tag/ParseName.hxx"
 #include "Parser.hxx"
 #include "Handler.hxx"
 
@@ -7,13 +9,10 @@ namespace Ytdl {
 
 enum class State {
 	NONE,
+	TAG,
 	TITLE,
 	DURATION,
-	UPLOAD_DATE,
-	UPLOADER,
-	UPLOADER_ID,
 	CREATOR,
-	DESCRIPTION,
 	WEBPAGE_URL,
 	PLAYLIST_TITLE,
 	PLAYLIST_INDEX,
@@ -22,6 +21,15 @@ enum class State {
 	HEADERS,
 	ENTRIES,
 	URL,
+};
+
+static constexpr struct tag_table ytdl_tags[] = {
+	{ "title", TAG_NAME },
+	{ "track", TAG_TITLE },
+	{ "album", TAG_ALBUM },
+	{ "artist", TAG_ARTIST },
+	{ "release_date", TAG_DATE },
+	{ nullptr, TAG_NUM_OF_ITEM_TYPES }
 };
 
 class ParserContext {
@@ -34,6 +42,7 @@ class ParserContext {
 	struct ParserData {
 		State &state;
 		size_t depth;
+		TagType tag = TAG_NUM_OF_ITEM_TYPES;
 
 		ParserData(State &_state, size_t _depth): state(_state), depth(_depth) { }
 	};
@@ -136,20 +145,19 @@ ParserContext::MapKey(StringView key) noexcept
 	ParserData data = CurrentState();
 
 	if (data.depth == 1) {
-		if (key.Equals("title")) {
+		data.tag = tag_name_parse(key);
+		if (data.tag != TAG_NUM_OF_ITEM_TYPES) {
+			data.tag = tag_table_lookup(ytdl_tags, key);
+		}
+
+		if (data.tag != TAG_NUM_OF_ITEM_TYPES) {
+			data.state = State::TAG;
+		} else if (key.Equals("title")) {
 			data.state = State::TITLE;
 		} else if (key.Equals("duration")) {
 			data.state = State::DURATION;
-		} else if (key.Equals("upload_date")) {
-			data.state = State::UPLOAD_DATE;
-		} else if (key.Equals("uploader")) {
-			data.state = State::UPLOADER;
-		} else if (key.Equals("uploader_id")) {
-			data.state = State::UPLOADER_ID;
 		} else if (key.Equals("creator")) {
 			data.state = State::CREATOR;
-		} else if (key.Equals("description")) {
-			data.state = State::DESCRIPTION;
 		} else if (key.Equals("webpage_url")) {
 			data.state = State::WEBPAGE_URL;
 		} else if (key.Equals("playlist_title")) {
@@ -186,23 +194,14 @@ ParserContext::String(StringView value) noexcept
 	StringMetadataTag tag;
 
 	switch (data.state) {
+		case State::TAG:
+			data.state = State::NONE;
+			return Result(handler.OnMetadata(data.tag, value));
 		case State::TITLE:
 			tag = StringMetadataTag::TITLE;
 			break;
-		case State::UPLOAD_DATE:
-			tag = StringMetadataTag::UPLOAD_DATE;
-			break;
-		case State::UPLOADER:
-			tag = StringMetadataTag::UPLOADER_NAME;
-			break;
-		case State::UPLOADER_ID:
-			tag = StringMetadataTag::UPLOADER_ID;
-			break;
 		case State::CREATOR:
 			tag = StringMetadataTag::CREATOR;
-			break;
-		case State::DESCRIPTION:
-			tag = StringMetadataTag::DESCRIPTION;
 			break;
 		case State::PLAYLIST_TITLE:
 			tag = StringMetadataTag::PLAYLIST_TITLE;
