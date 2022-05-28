@@ -12,19 +12,6 @@
 namespace Ytdl {
 
 class TagHandler final : public MetadataHandler {
-	template<typename T>
-	struct Prioritise {
-		int priority = -1;
-		T value;
-
-		void ReplaceWith(int new_priority, const T &new_value) noexcept {
-			if (new_priority > priority) {
-				value = new_value;
-				priority = new_priority;
-			}
-		}
-	};
-
 	std::unique_ptr<TagBuilder> builder;
 	std::forward_list<TagHandler> entries;
 	std::multimap<std::string, std::string> headers;
@@ -32,7 +19,8 @@ class TagHandler final : public MetadataHandler {
 	std::string url;
 	std::string webpage_url;
 	std::string type;
-	Prioritise<std::string> artist;
+	std::string title;
+	std::string creator;
 	int playlist_index = -1;
 
 	TagHandler *current_entry = nullptr;
@@ -43,6 +31,7 @@ class TagHandler final : public MetadataHandler {
 	ParseContinue OnEntryStart() noexcept override;
 	ParseContinue OnEntryEnd() noexcept override;
 	ParseContinue OnEnd() noexcept override;
+	ParseContinue OnMetadata(TagType tag, StringView value) noexcept override;
 	ParseContinue OnMetadata(StringMetadataTag tag, StringView value) noexcept override;
 	ParseContinue OnMetadata(IntMetadataTag tag, long long int value) noexcept override;
 	ParseContinue OnHeader(StringView header, StringView value) noexcept override;

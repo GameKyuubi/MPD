@@ -53,8 +53,11 @@ TagHandler::OnEntryEnd() noexcept
 ParseContinue
 TagHandler::OnEnd() noexcept
 {
-	if (!artist.value.empty()) {
-		builder->AddItem(TAG_ARTIST, StringView(artist.value));
+	if (!builder->HasType(TAG_TITLE) && !title.empty()) {
+		builder->AddItem(TAG_TITLE, StringView(title));
+	}
+	if (!builder->HasType(TAG_ARTIST) && !creator.empty()) {
+		builder->AddItem(TAG_ARTIST, StringView(creator));
 	}
 
 	this->SortEntries();
@@ -72,22 +75,10 @@ TagHandler::OnMetadata(StringMetadataTag tag, StringView value) noexcept
 	try {
 		switch (tag) {
 			case StringMetadataTag::CREATOR:
-				artist.ReplaceWith((int)PriorityArtist::CREATOR, value.ToString());
-				break;
-			case StringMetadataTag::DESCRIPTION:
-				builder->AddItem(TAG_COMMENT, value);
+				creator = value.ToString();
 				break;
 			case StringMetadataTag::TITLE:
-				builder->AddItem(TAG_TITLE, value);
-				break;
-			case StringMetadataTag::UPLOAD_DATE:
-				builder->AddItem(TAG_DATE, value);
-				break;
-			case StringMetadataTag::UPLOADER_NAME:
-				artist.ReplaceWith((int)PriorityArtist::UPLOADER_NAME, value.ToString());
-				break;
-			case StringMetadataTag::UPLOADER_ID:
-				artist.ReplaceWith((int)PriorityArtist::UPLOADER_ID, value.ToString());
+				title = value.ToString();
 				break;
 			case StringMetadataTag::URL:
 				url = value.ToString();
@@ -128,6 +119,18 @@ TagHandler::OnMetadata(IntMetadataTag tag, long long int value) noexcept
 		default:
 			break;
 	}
+
+	return ParseContinue::CONTINUE;
+}
+
+ParseContinue
+TagHandler::OnMetadata(TagType tag, StringView value) noexcept
+{
+	if (current_entry) {
+		return current_entry->OnMetadata(tag, value);
+	}
+
+	builder->AddItem(tag, value);
 
 	return ParseContinue::CONTINUE;
 }
