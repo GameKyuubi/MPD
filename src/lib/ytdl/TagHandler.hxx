@@ -5,6 +5,7 @@
 
 #include "util/StringView.hxx"
 #include "tag/Builder.hxx"
+#include "lib/curl/Headers.hxx"
 #include <forward_list>
 #include <string>
 #include <map>
@@ -14,7 +15,7 @@ namespace Ytdl {
 class TagHandler final : public MetadataHandler {
 	std::unique_ptr<TagBuilder> builder;
 	std::forward_list<TagHandler> entries;
-	std::multimap<std::string, std::string> headers;
+	Curl::Headers headers;
 	std::string extractor;
 	std::string url;
 	std::string webpage_url;
@@ -43,7 +44,7 @@ public:
 		return url;
 	}
 
-	const std::multimap<std::string, std::string> &GetHeaders() const noexcept {
+	const Curl::Headers &GetHeaders() const noexcept {
 		return headers;
 	}
 
